@@ -31,6 +31,7 @@ def query_tool() -> mcp.types.Tool:
                             '  - Primitive fields using format {"AliasName": "FieldName"} (i.e. {"Name": "Product Management/Name"})',
                             '  - Related entity fields using format {"AliasName": ["Related entity", "related entity field"]} (i.e. {"Secret": ["Product Management/Description", "Collaboration~Documents/secret"]}). Careful, does not work with 1-* connection!',
                             'To work with 1-* relationships, you can use sub-querying: {"AliasName": {"q/from": "Related type", "q/select": {"AliasName 2": "fibery/id"}, "q/limit": 50}}',
+                            'IMPORTANT: In sub-queries, q/limit must be a NUMBER (e.g., 50), not a string or parameter.',
                             "AliasName can be of any arbitrary value.",
                         ]
                     ),
