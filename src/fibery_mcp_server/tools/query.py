@@ -42,9 +42,9 @@ def query_tool() -> mcp.types.Tool:
                         [
                             'Filter conditions in array format [operator, [field_path], value] or ["q/and"|"q/or", ...conditions]. Common usages:',
                             '- Simple comparison: ["=", ["field", "path"], "$param"]. You cannot pass value of $param directly in where clause. Use params object instead. Pay really close attention to it as it is not common practice, but that\'s how it works in our case!',
-                            '- Collection membership: ["q/contains", ["collection/field"], "$itemId"] - checks if a collection contains an item (for many-to-many relationships)',
+                            '- Collection membership: ["q/contains", ["collection/field", "fibery/id"], "$itemId"] - checks if a collection contains an item. IMPORTANT: must include "fibery/id" in the field path!',
                             '- Logical combinations: ["q/and", ["<", ["field1"], "$param1"], ["=", ["field2"], "$param2"]]',
-                            "- Available operators: =, !=, <, <=, >, >=, q/contains (for collections), q/not-contains, q/in, q/not-in",
+                            "- Available operators: =, !=, <, <=, >, >=, q/contains (for collections only), q/not-contains, q/in, q/not-in",
                             "- Note: Text search on string fields is not directly supported via q/contains. Use exact match (=) or other field-specific filters.",
                         ]
                     ),

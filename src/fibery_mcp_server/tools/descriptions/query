@@ -96,16 +96,13 @@ Tool use:
     "q_from": "Project Management/Project",
     "q_select": {
         "Name": ["Project Management/Name"],
-        "Public Id": ["fibery/public-id"],
-        "Assignees": {
-            "q/from": ["Project Management/Assignees"],
-            "q/select": {"Name": ["fibery/user", "user/name"]},
-            "q/limit": 50
-        }
+        "Public Id": ["fibery/public-id"]
     },
-    "q_where": ["q/contains", ["Project Management/Assignees"], "$userId"],
+    "q_where": ["q/contains", ["Project Management/Assignees", "fibery/id"], "$userId"],
     "q_limit": 50,
     "q_params": {
         "$userId": "user-uuid-here"
     }
 }
+
+Note: When using q/contains with collections, you must specify the field path including the ID field: ["CollectionName", "fibery/id"]
