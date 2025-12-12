@@ -11,13 +11,16 @@ database_tool_name = "describe_database"
 def database_tool() -> mcp.types.Tool:
     return mcp.types.Tool(
         name=database_tool_name,
-        description="Get list of all fields (in format of 'Title [name]: type') in the selected Fibery database and for all related databases.",
+        description=(
+            "Get list of all fields (in format of 'Title [name]: type') in the selected Fibery database and for all related databases. "
+            "Example: to describe the 'Software Development/Task' database, call with database_name='Software Development/Task'."
+        ),
         inputSchema={
             "type": "object",
             "properties": {
                 "database_name": {
                     "type": "string",
-                    "description": "Database name as defined in Fibery schema",
+                    "description": "Database name as defined in Fibery schema (e.g., 'Software Development/Task', 'Project Management/Project')",
                 }
             },
             "required": ["database_name"],

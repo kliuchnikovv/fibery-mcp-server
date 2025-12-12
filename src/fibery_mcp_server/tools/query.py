@@ -42,9 +42,10 @@ def query_tool() -> mcp.types.Tool:
                         [
                             'Filter conditions in array format [operator, [field_path], value] or ["q/and"|"q/or", ...conditions]. Common usages:',
                             '- Simple comparison: ["=", ["field", "path"], "$param"]. You cannot pass value of $param directly in where clause. Use params object instead. Pay really close attention to it as it is not common practice, but that\'s how it works in our case!',
-                            '- Text search: ["q/contains", ["field/path"], "$searchText"] - searches for text within a field',
+                            '- Collection membership: ["q/contains", ["collection/field"], "$itemId"] - checks if a collection contains an item (for many-to-many relationships)',
                             '- Logical combinations: ["q/and", ["<", ["field1"], "$param1"], ["=", ["field2"], "$param2"]]',
-                            "- Available operators: =, !=, <, <=, >, >=, q/contains, q/not-contains, q/in, q/not-in",
+                            "- Available operators: =, !=, <, <=, >, >=, q/contains (for collections), q/not-contains, q/in, q/not-in",
+                            "- Note: Text search on string fields is not directly supported via q/contains. Use exact match (=) or other field-specific filters.",
                         ]
                     ),
                 },
@@ -80,10 +81,23 @@ def get_rich_text_fields(q_select: Dict[str, Any], database: Database) -> Tuple[
     rich_text_fields = []
     safe_q_select = deepcopy(q_select)
     for field_alias, field_name in safe_q_select.items():
+        # Skip sub-queries (dict values) - they don't need rich text processing
+        if isinstance(field_name, dict):
+            continue
+            
         if not isinstance(field_name, str):
             if isinstance(field_name, list):
                 field_name = field_name[0]
-        if database.fields_by_name().get(field_name, None).is_rich_text():
+            else:
+                # Skip any other non-string, non-list, non-dict types
+                continue
+        
+        # Get the field from database schema, skip if not found
+        field = database.fields_by_name().get(field_name, None)
+        if field is None:
+            continue
+            
+        if field.is_rich_text():
             rich_text_fields.append({"alias": field_alias, "name": field_name})
             safe_q_select[field_alias] = [field_name, "Collaboration~Documents/secret"]
     return rich_text_fields, safe_q_select

@@ -1,4 +1,7 @@
 Run any Fibery API command. This gives tremendous flexibility, but requires a bit of experience with the low-level Fibery API. In case query succeeded, return value contains a list of records with fields you specified in select. If request failed, will return detailed error message.
+
+IMPORTANT: Text search (substring matching) on string fields like Name or Description is NOT supported via q/contains in the command API. The q/contains operator only works for checking collection membership (many-to-many relationships). For finding entities by name, use exact match with "=" operator, or ask the user to provide more specific criteria (tags, states, dates, etc.).
+
 Examples (note, that these databases are non-existent, use databases only from user's schema!):
 Query: What newly created Features do we have for the past 2 months?
 Tool use:
@@ -87,18 +90,22 @@ Tool use:
     }
 }
 
-Query: Find all Features that contain "authentication" in their name.
+Query: Find all Projects that have a specific User assigned to them (many-to-many relationship).
 Tool use:
 {
-    "q_from": "Dev/Feature",
+    "q_from": "Project Management/Project",
     "q_select": {
-        "Name": ["Dev/Name"],
+        "Name": ["Project Management/Name"],
         "Public Id": ["fibery/public-id"],
-        "Description": ["Dev/Description"]
+        "Assignees": {
+            "q/from": ["Project Management/Assignees"],
+            "q/select": {"Name": ["fibery/user", "user/name"]},
+            "q/limit": 50
+        }
     },
-    "q_where": ["q/contains", ["Dev/Name"], "$searchText"],
+    "q_where": ["q/contains", ["Project Management/Assignees"], "$userId"],
     "q_limit": 50,
     "q_params": {
-        "$searchText": "authentication"
+        "$userId": "user-uuid-here"
     }
 }
