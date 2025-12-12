@@ -1,14 +1,42 @@
 Update Fibery entity with specified fields.
-Examples (note, that these databases are non-existent, use databases only from user's schema!):
-Query: Update a feature we talked about
-Tool use:
+
+IMPORTANT: You MUST include "fibery/id" field to identify which entity to update.
+
+FIELD NAMING:
+- Use full field names in "Space/FieldName" format (e.g., "Product Management/Name")
+- System fields use "fibery/" prefix (e.g., "fibery/id")
+- Workflow state field: "workflow/state"
+
+FIELD TYPES:
+- Text fields: Use string values
+- Workflow/Enum fields: Use string literal of the enum value (e.g., "To Do", "In Progress")
+- Rich Text fields: Use object with "append" (boolean) and "content" (string)
+  - {"append": false, "content": "New content"} - replaces entire content
+  - {"append": true, "content": "Additional text"} - appends to existing content
+- Relation fields: Use object with "fibery/id" (e.g., {"fibery/id": "uuid-here"})
+
+EXAMPLES (note, that these databases are non-existent, use databases only from user's schema!):
+
+Example 1: Simple field update
 {
     "database": "Product Management/Feature",
     "entity": {
         "fibery/id": "12345678-1234-5678-1234-567812345678",
-        "Product Management/Name": "New Feature 2",
-        "Product Management/Description": {"append": true, "content": "Notes: some notes"},
+        "Product Management/Name": "Updated Feature Name",
         "workflow/state": "In Progress"
     }
 }
+
+Example 2: Update with Rich Text append
+{
+    "database": "Software Development/Task",
+    "entity": {
+        "fibery/id": "12345678-1234-5678-1234-567812345678",
+        "Software Development/name": "Fix login bug",
+        "Software Development/Description": {"append": true, "content": "\n\nNotes: Fixed by updating authentication logic"},
+        "workflow/state": "Done"
+    }
+}
+
+RESULT:
 In case of successful execution, you will get a link to updated entity. Make sure to give that link to the user.

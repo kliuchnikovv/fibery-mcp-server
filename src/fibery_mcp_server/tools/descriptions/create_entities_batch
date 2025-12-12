@@ -1,20 +1,34 @@
 Create multiple Fibery entities at once with specified fields.
-Examples (note, that these databases are non-existent, use databases only from user's schema!):
-Query: Create some features
-Tool use:
+
+FIELD NAMING:
+- Use full field names in "Space/FieldName" format (e.g., "Product Management/Name")
+- System fields use "fibery/" prefix (e.g., "fibery/id")
+- Workflow state field: "workflow/state"
+
+FIELD TYPES:
+- Text fields: Use string values
+- Workflow/Enum fields: Use string literal of the enum value (e.g., "To Do", "In Progress")
+- Rich Text fields: Use string with markdown or plain text content
+- Relation fields: Use object with "fibery/id" (e.g., {"fibery/id": "uuid-here"})
+
+EXAMPLES (note, that these databases are non-existent, use databases only from user's schema!):
+
+Example: Create multiple features
 {
     "database": "Product Management/Feature",
     "entities": [
         {
             "Product Management/Name": "New Feature 1",
             "Product Management/Description": "Description of the new feature 1",
-            "workflow/state": "To Do" # notice how we use string literal for workflow field here
+            "workflow/state": "To Do"
         },
         {
             "Product Management/Name": "New Feature 2",
             "Product Management/Description": "Description of the new feature 2",
-            "workflow/state": "In Progress" # notice how we use string literal for workflow field here
+            "workflow/state": "In Progress"
         }
     ]
 }
+
+RESULT:
 In case of successful execution, you will get links to created entities. Make sure to give the links to the user.

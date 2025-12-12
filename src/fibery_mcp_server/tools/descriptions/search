@@ -1,0 +1,61 @@
+Search for entities by text/substring matching in specified fields. This tool performs client-side filtering since Fibery API does not expose a dedicated text search endpoint.
+
+IMPORTANT: This tool fetches entities from the database and filters them on the client side. For large databases (>10,000 entities), this may be slow. Use the limit parameter to control performance.
+
+HOW IT WORKS:
+1. Fetches entities from the specified database (up to limit)
+2. Filters results where any search_field contains the query string (case-insensitive)
+3. Returns only matching entities
+
+PARAMETERS:
+- database: Required. Database name in "Space/Type" format (e.g., "Software Development/Task")
+- query: Required. Text to search for (case-insensitive substring matching)
+- search_fields: Optional. List of field names to search in. Default: ["Name"]
+  Example: ["Software Development/name", "Software Development/Description"]
+- return_fields: Optional. Object specifying which fields to return in results.
+  Format same as q_select in query_database. Default: {"Name": "Space/name", "Id": "fibery/id"}
+- limit: Optional. Maximum number of entities to fetch before filtering. Default: 500, Max: 2000
+
+EXAMPLES:
+
+Example 1: Simple search in Name field
+{
+    "database": "Software Development/Task",
+    "query": "mcp",
+    "limit": 1000
+}
+Returns all tasks where Name contains "mcp" (case-insensitive)
+
+Example 2: Search in multiple fields
+{
+    "database": "Software Development/Task",
+    "query": "bug",
+    "search_fields": ["Software Development/name", "Software Development/Description"],
+    "limit": 500
+}
+Returns tasks where Name OR Description contains "bug"
+
+Example 3: Custom return fields
+{
+    "database": "Software Development/Task",
+    "query": "mcp",
+    "search_fields": ["Software Development/name"],
+    "return_fields": {
+        "Name": "Software Development/name",
+        "Id": "fibery/id",
+        "State": ["workflow/state", "enum/name"],
+        "Feature": ["Software Development/Feature", "Software Development/Name"]
+    },
+    "limit": 1000
+}
+
+PERFORMANCE NOTES:
+- Fetching 500 entities typically takes 1-2 seconds
+- Fetching 2000 entities may take 5-10 seconds
+- Use limit parameter to balance between coverage and performance
+- For very large databases, consider using query_database with exact filters instead
+
+LIMITATIONS:
+- Cannot search in Rich Text fields (only plain text fields)
+- Searches entire field content (no phrase matching or advanced search operators)
+- Case-insensitive only (cannot do case-sensitive search)

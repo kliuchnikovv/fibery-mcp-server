@@ -13,17 +13,17 @@ def database_tool() -> mcp.types.Tool:
         name=database_tool_name,
         description=(
             "Get list of all fields (in format of 'Title [name]: type') in the selected Fibery database and for all related databases. "
-            "Example: to describe the 'Software Development/Task' database, call with database_name='Software Development/Task'."
+            "Example: to describe the 'Software Development/Task' database, call with database='Software Development/Task'."
         ),
         inputSchema={
             "type": "object",
             "properties": {
-                "database_name": {
+                "database": {
                     "type": "string",
                     "description": "Database name as defined in Fibery schema (e.g., 'Software Development/Task', 'Project Management/Project')",
                 }
             },
-            "required": ["database_name"],
+            "required": ["database"],
         },
     )
 
@@ -38,9 +38,9 @@ def describe_database(database: str, fields: List[PrettyField]) -> str:
 async def handle_database(fibery_client: FiberyClient, arguments: Dict[str, Any]) -> List[mcp.types.TextContent]:
     schema: Schema = await fibery_client.get_schema()
 
-    database_name: str = arguments.get("database_name")
+    database_name: str = arguments.get("database")
     if not database_name:
-        return [mcp.types.TextContent(type="text", text="Error: database_name is not provided.")]
+        return [mcp.types.TextContent(type="text", text="Error: database is not provided.")]
 
     database: Database | None = schema.databases_by_name().get(database_name, None)
     if not database:

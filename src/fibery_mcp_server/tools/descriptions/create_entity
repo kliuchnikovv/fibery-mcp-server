@@ -1,13 +1,38 @@
 Create Fibery entity with specified fields.
-Examples (note, that these databases are non-existent, use databases only from user's schema!):
-Query: Create a feature
-Tool use:
+
+FIELD NAMING:
+- Use full field names in "Space/FieldName" format (e.g., "Product Management/Name")
+- System fields use "fibery/" prefix (e.g., "fibery/id")
+- Workflow state field: "workflow/state"
+
+FIELD TYPES:
+- Text fields: Use string values
+- Workflow/Enum fields: Use string literal of the enum value (e.g., "To Do", "In Progress")
+- Rich Text fields: Use string with markdown or plain text content
+- Relation fields: Use object with "fibery/id" (e.g., {"fibery/id": "uuid-here"})
+
+EXAMPLES (note, that these databases are non-existent, use databases only from user's schema!):
+
+Example 1: Simple entity creation
 {
     "database": "Product Management/Feature",
     "entity": {
         "Product Management/Name": "New Feature",
         "Product Management/Description": "Description of the new feature",
-        "workflow/state": "To Do" # notice how we use string literal for workflow field here
+        "workflow/state": "To Do"
     }
 }
+
+Example 2: Entity with relations
+{
+    "database": "Software Development/Task",
+    "entity": {
+        "Software Development/name": "Fix bug in login",
+        "Software Development/Description": "Users cannot log in with special characters",
+        "workflow/state": "In Progress",
+        "Software Development/Feature": {"fibery/id": "12345678-1234-5678-1234-567812345678"}
+    }
+}
+
+RESULT:
 In case of successful execution, you will get a link to created entity. Make sure to give that link to the user.
