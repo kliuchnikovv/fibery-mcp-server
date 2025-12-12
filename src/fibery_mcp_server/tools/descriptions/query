@@ -86,3 +86,19 @@ Tool use:
         $publicId: "1",
     }
 }
+
+Query: Find all Features that contain "authentication" in their name.
+Tool use:
+{
+    "q_from": "Dev/Feature",
+    "q_select": {
+        "Name": ["Dev/Name"],
+        "Public Id": ["fibery/public-id"],
+        "Description": ["Dev/Description"]
+    },
+    "q_where": ["q/contains", ["Dev/Name"], "$searchText"],
+    "q_limit": 50,
+    "q_params": {
+        "$searchText": "authentication"
+    }
+}

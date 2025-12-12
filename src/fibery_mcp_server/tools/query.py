@@ -36,11 +36,12 @@ def query_tool() -> mcp.types.Tool:
                     ),
                 },
                 "q_where": {
-                    "type": "object",
+                    "type": "array",
                     "description": "\n".join(
                         [
-                            'Filter conditions in format [operator, [field_path], value] or ["q/and"|"q/or", ...conditions]. Common usages:',
+                            'Filter conditions in array format [operator, [field_path], value] or ["q/and"|"q/or", ...conditions]. Common usages:',
                             '- Simple comparison: ["=", ["field", "path"], "$param"]. You cannot pass value of $param directly in where clause. Use params object instead. Pay really close attention to it as it is not common practice, but that\'s how it works in our case!',
+                            '- Text search: ["q/contains", ["field/path"], "$searchText"] - searches for text within a field',
                             '- Logical combinations: ["q/and", ["<", ["field1"], "$param1"], ["=", ["field2"], "$param2"]]',
                             "- Available operators: =, !=, <, <=, >, >=, q/contains, q/not-contains, q/in, q/not-in",
                         ]
