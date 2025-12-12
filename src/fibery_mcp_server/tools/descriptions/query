@@ -1,5 +1,12 @@
 Run any Fibery API command. This gives tremendous flexibility, but requires a bit of experience with the low-level Fibery API. In case query succeeded, return value contains a list of records with fields you specified in select. If request failed, will return detailed error message.
 
+🚫 CRITICAL LIMITATION - TEXT SEARCH IS IMPOSSIBLE:
+You CANNOT search for text/substrings in fields like Name or Description. There is NO operator for "contains text" or "LIKE '%text%'".
+- q/contains is ONLY for collection membership (many-to-many relationships), NOT for text search
+- You can ONLY use exact match (=) for text fields
+- If user asks to find tasks "containing" or "mentioning" text, you MUST inform them this is not possible via API
+- Alternative: suggest filtering by exact name, tags (by UUID), states, dates, or other structured fields
+
 ⚠️ CRITICAL WARNINGS - READ FIRST:
 1. This is NOT SQL! Do not use SQL syntax like "WHERE field LIKE '%value%'" or "SELECT field1, field2"
 2. Parameter names are: q_from, q_select, q_where, q_params (NOT database_name, NOT where, NOT query)
@@ -86,8 +93,27 @@ COMMON PITFALLS TO AVOID:
     "Name": "Space/name"
 }
 
-TEXT SEARCH LIMITATION:
-Text search (substring matching) on string fields like Name or Description is NOT supported. The q/contains operator only works for checking collection membership (many-to-many relationships). For finding entities by name, use exact match with "=" operator, or ask the user to provide more specific criteria (tags, states, dates, etc.).
+TEXT SEARCH LIMITATION - READ THIS CAREFULLY:
+Fibery API does NOT support text/substring search. This means:
+❌ You CANNOT find tasks where Name contains "mcp"
+❌ You CANNOT find tasks where Description mentions "bug"
+❌ You CANNOT use wildcards or partial matching
+❌ q/contains does NOT work for text - it's ONLY for collections!
+
+What you CAN do:
+✅ Exact match: [
+    "=",
+    [
+        "Software Development/name"
+    ],
+    "$exactName"
+] with q_params: {
+    "$exactName": "Exact Task Name"
+}
+✅ Filter by tags (requires UUID lookup first - see workflow below)
+✅ Filter by state, dates, numeric fields, etc.
+
+If user requests text search, INFORM them it's not possible and suggest alternatives.
 
 HOW TO FILTER BY TAGS (Step-by-Step):
 Since tags are a many-to-many relationship and require UUIDs, you must:
