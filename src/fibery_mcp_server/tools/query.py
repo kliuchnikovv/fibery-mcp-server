@@ -37,6 +37,7 @@ def query_tool() -> mcp.types.Tool:
                 },
                 "q_where": {
                     "type": "array",
+                    "items": {},  # Allow any items in the array for flexible filter syntax
                     "description": "\n".join(
                         [
                             'Filter conditions in array format [operator, [field_path], value] or ["q/and"|"q/or", ...conditions]. Common usages:',
