@@ -37,7 +37,11 @@ def search_tool() -> mcp.types.Tool:
                 },
                 "limit": {
                     "type": "integer",
-                    "description": "Maximum number of entities to fetch before filtering. Default: 500, Max: 2000",
+                    "description": "Maximum number of entities to scan in this batch for filtering. Default: 500.",
+                },
+                "offset": {
+                    "type": "integer",
+                    "description": "Number of entities to skip before starting the scan (for pagination). Default: 0.",
                 },
             },
             "required": ["database", "query"],
@@ -48,7 +52,8 @@ def search_tool() -> mcp.types.Tool:
 async def handle_search(fibery_client: FiberyClient, arguments: Dict[str, Any]) -> List[mcp.types.TextContent]:
     database = arguments["database"]
     query = arguments["query"].lower()  # Case-insensitive search
-    limit = min(arguments.get("limit", 500), 2000)  # Cap at 2000
+    limit = arguments.get("limit", 500)
+    offset = arguments.get("offset", 0)
     
     # Determine search fields
     search_fields = arguments.get("search_fields")
@@ -88,6 +93,7 @@ async def handle_search(fibery_client: FiberyClient, arguments: Dict[str, Any]) 
             "q/from": database,
             "q/select": q_select,
             "q/limit": limit,
+            "q/offset": offset
         },
         None
     )
@@ -95,28 +101,30 @@ async def handle_search(fibery_client: FiberyClient, arguments: Dict[str, Any]) 
     if not query_result.success:
         return [mcp.types.TextContent(type="text", text=f"Error querying database: {query_result.result}")]
     
-    # Filter results client-side
     entities = query_result.result
     matching_entities = []
     
+    # Filter results client-side
     for entity in entities:
         # Check if query appears in any search field
         match_found = False
         for search_field in search_fields:
-            # Find the value in the entity
-            # It could be under the field name directly or under an alias
             field_value = None
             
-            # Try to find the value
-            for key, value in entity.items():
-                if isinstance(value, str):
-                    # Check if this is the search field
-                    field_alias = f"_search_{search_field.replace('/', '_').replace(' ', '_')}"
-                    if key == field_alias or key == search_field:
+            # Find the value in the entity (check fields and aliases)
+            field_alias = f"_search_{search_field.replace('/', '_').replace(' ', '_')}"
+            
+            # Try finding value by alias first, then by raw field name
+            if field_alias in entity:
+                field_value = entity[field_alias]
+            else:
+                # Look for value matching the field path/name
+                for key, value in entity.items():
+                    if key == search_field:
                         field_value = value
                         break
-            
-            if field_value and query in field_value.lower():
+
+            if field_value and isinstance(field_value, str) and query in field_value.lower():
                 match_found = True
                 break
         
@@ -124,9 +132,12 @@ async def handle_search(fibery_client: FiberyClient, arguments: Dict[str, Any]) 
             # Remove internal search fields from result
             filtered_entity = {k: v for k, v in entity.items() if not k.startswith("_search_")}
             matching_entities.append(filtered_entity)
-    
+            
     # Return results
-    result_text = f"Found {len(matching_entities)} matching entities (searched {len(entities)} total):\n\n"
+    result_text = f"Scanned {len(entities)} entities (offset {offset}, limit {limit}). Found {len(matching_entities)} matches:\n\n"
     result_text += str({"success": True, "result": matching_entities})
+    
+    if len(entities) == limit:
+        result_text += f"\n\nTo continue searching, call this tool again with offset={offset + limit}."
     
     return [mcp.types.TextContent(type="text", text=result_text)]
