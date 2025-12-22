@@ -119,11 +119,22 @@ async def handle_search(fibery_client: FiberyClient, arguments: Dict[str, Any]) 
             if field_alias in entity:
                 field_value = entity[field_alias]
             else:
-                # Look for value matching the field path/name
-                for key, value in entity.items():
-                    if key == search_field:
-                        field_value = value
+                # Check if this search field maps to a returned alias
+                # Iterate through q_select to see if any alias maps to this search_field
+                found_alias = None
+                for q_alias, q_field in q_select.items():
+                    if q_field == search_field:
+                        found_alias = q_alias
                         break
+                
+                if found_alias and found_alias in entity:
+                    field_value = entity[found_alias]
+                else:
+                    # Fallback: Look for value matching the field path/name directly
+                    for key, value in entity.items():
+                        if key == search_field:
+                            field_value = value
+                            break
 
             if field_value and isinstance(field_value, str) and query in field_value.lower():
                 match_found = True
