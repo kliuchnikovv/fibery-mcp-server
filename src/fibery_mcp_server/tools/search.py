@@ -93,7 +93,8 @@ async def handle_search(fibery_client: FiberyClient, arguments: Dict[str, Any]) 
             "q/from": database,
             "q/select": q_select,
             "q/limit": limit,
-            "q/offset": offset
+            "q/offset": offset,
+            "q/order": ["fibery/modification-date", "desc"],
         },
         None
     )
